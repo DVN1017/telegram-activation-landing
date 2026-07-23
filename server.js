@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
@@ -15,6 +16,9 @@ const supabase = createClient(
 );
 
 app.get("/", (req, res) => {
+  if (process.env.VERCEL) {
+    return res.sendFile(path.join(__dirname, "index.html"));
+  }
   res.send("API Flexi Activation OK");
 });
 

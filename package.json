@@ -2,8 +2,10 @@
   "name": "telegram-activation-landing",
   "version": "1.0.0",
   "description": "Projet SaaS-like pour demander l'activation d'un compte Telegram.",
-  "main": "main.js",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
