@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Admin — Activation Requests</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <main class="container admin-dashboard" style="padding:36px 20px">
+      <header class="admin-header">
+        <h1>Dashboard Admin</h1>
+        <p class="muted">Suivi des demandes d'activation</p>
+      </header>
+
+      <section class="admin-stats" aria-label="Statistiques">
+        <article class="stat card">
+          <div class="stat-label">Total Orders</div>
+          <div class="stat-value" id="statTotal">0</div>
+        </article>
+        <article class="stat card">
+          <div class="stat-label">Pending</div>
+          <div class="stat-value" id="statPending">0</div>
+        </article>
+        <article class="stat card">
+          <div class="stat-label">Paid</div>
+          <div class="stat-value" id="statPaid">0</div>
+        </article>
+        <article class="stat card">
+          <div class="stat-label">Revenue</div>
+          <div class="stat-value" id="statRevenue">0 FCFA</div>
+        </article>
+      </section>
+
+      <section class="card admin-controls" aria-label="Filtres">
+        <input id="searchInput" type="search" placeholder="Rechercher par client, téléphone ou numéro de commande">
+        <select id="serviceFilter" aria-label="Filtrer par service">
+          <option value="all">Tous les services</option>
+        </select>
+        <select id="statusFilter" aria-label="Filtrer par statut">
+          <option value="all">Tous les statuts</option>
+          <option value="pending">Pending</option>
+          <option value="paid">Paid</option>
+          <option value="failed">Failed</option>
+        </select>
+      </section>
+
+      <section class="table-section card" aria-label="Commandes" style="margin-top:20px;padding:0">
+        <div class="table-head">
+          <strong>Activation Requests</strong>
+        </div>
+        <div class="table-wrap">
+          <table class="admin-table" id="ordersTable">
+            <thead>
+              <tr>
+                <th>Order Number</th>
+                <th>Customer Name</th>
+                <th>Phone</th>
+                <th>Country</th>
+                <th>Service</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Created At</th>
+                <th>WhatsApp</th>
+              </tr>
+            </thead>
+            <tbody id="ordersBody"></tbody>
+          </table>
+        </div>
+        <p id="adminMessage" class="admin-message" hidden></p>
+      </section>
+    </main>
+
+    <style>
+      .admin-dashboard .admin-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .admin-dashboard .admin-controls {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: minmax(240px, 1fr) 220px 180px;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .admin-dashboard .admin-controls input,
+      .admin-dashboard .admin-controls select {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(16,24,40,0.12);
+        background: #fff;
+      }
+
+      .admin-dashboard .table-head {
+        padding: 16px;
+        border-bottom: 1px solid rgba(16,24,40,0.08);
+      }
+
+      .admin-dashboard .table-wrap {
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      .admin-dashboard .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .admin-dashboard .admin-table th,
+      .admin-dashboard .admin-table td {
+        padding: 12px 14px;
+        border-bottom: 1px solid rgba(16,24,40,0.08);
+        text-align: left;
+        vertical-align: middle;
+      }
+
+      .admin-dashboard .admin-table th {
+        font-size: 13px;
+        letter-spacing: 0.02em;
+        color: #475467;
+      }
+
+      .admin-dashboard .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        padding: 5px 10px;
+        font-weight: 700;
+        font-size: 12px;
+      }
+
+      .admin-dashboard .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .admin-dashboard .status-paid {
+        background: #dcfce7;
+        color: #166534;
+      }
+
+      .admin-dashboard .status-failed {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .admin-dashboard .wa-btn {
+        display: inline-block;
+        border-radius: 8px;
+        padding: 7px 10px;
+        text-decoration: none;
+        font-weight: 600;
+        background: #ecfdf3;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+      }
+
+      .admin-dashboard .admin-message {
+        margin: 14px 16px 18px;
+        color: #b42318;
+      }
+
+      @media (max-width: 980px) {
+        .admin-dashboard .admin-stats {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .admin-dashboard .admin-controls {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .admin-dashboard .admin-table thead {
+          display: none;
+        }
+
+        .admin-dashboard .admin-table,
+        .admin-dashboard .admin-table tbody,
+        .admin-dashboard .admin-table tr,
+        .admin-dashboard .admin-table td {
+          display: block;
+          width: 100%;
+        }
+
+        .admin-dashboard .admin-table tr {
+          border-bottom: 1px solid rgba(16,24,40,0.1);
+          padding: 10px 0;
+        }
+
+        .admin-dashboard .admin-table td {
+          border: 0;
+          padding: 7px 14px;
+        }
+
+        .admin-dashboard .admin-table td::before {
+          content: attr(data-label);
+          display: inline-block;
+          min-width: 124px;
+          margin-right: 8px;
+          color: #667085;
+          font-weight: 600;
+        }
+      }
+    </style>
+
+    <script src="config.js"></script>
+    <script>
+      (async function(){
+        const body = document.getElementById('ordersBody');
+        const msg = document.getElementById('adminMessage');
+        const searchInput = document.getElementById('searchInput');
+        const serviceFilter = document.getElementById('serviceFilter');
+        const statusFilter = document.getElementById('statusFilter');
+        const statTotal = document.getElementById('statTotal');
+        const statPending = document.getElementById('statPending');
+        const statPaid = document.getElementById('statPaid');
+        const statRevenue = document.getElementById('statRevenue');
+
+        const allOrders = await loadOrders();
+        if(!allOrders){
+          return;
+        }
+        allOrders.sort((a, b)=> new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+        populateServiceFilter(allOrders);
+        renderStats(allOrders);
+        renderRows(allOrders);
+
+        searchInput.addEventListener('input', ()=>renderRows(allOrders.filter(matchesFilters)));
+        serviceFilter.addEventListener('change', ()=>renderRows(allOrders.filter(matchesFilters)));
+        statusFilter.addEventListener('change', ()=>renderRows(allOrders.filter(matchesFilters)));
+
+        function matchesFilters(row){
+          const term = (searchInput.value || '').toLowerCase().trim();
+          const service = (serviceFilter.value || 'all').toLowerCase();
+          const status = (statusFilter.value || 'all').toLowerCase();
+
+          const orderNumber = getOrderNumber(row).toLowerCase();
+          const customer = String(row.fullname || '').toLowerCase();
+          const phone = String(row.phone || '').toLowerCase();
+          const rowService = String(row.service || '').toLowerCase();
+          const rowStatus = normalizePaymentStatus(row.payment_status);
+
+          const matchesSearch = !term || orderNumber.includes(term) || customer.includes(term) || phone.includes(term);
+          const matchesService = service === 'all' || rowService === service;
+          const matchesStatus = status === 'all' || rowStatus === status;
+
+          return matchesSearch && matchesService && matchesStatus;
+        }
+
+        function renderRows(rows){
+          body.innerHTML = '';
+
+          if(!rows.length){
+            const tr = document.createElement('tr');
+            const td = document.createElement('td');
+            td.colSpan = 9;
+            td.textContent = 'Aucune commande trouvee.';
+            tr.appendChild(td);
+            body.appendChild(tr);
+            return;
+          }
+
+          rows.forEach((row)=>{
+            const tr = document.createElement('tr');
+            const status = normalizePaymentStatus(row.payment_status);
+
+            tr.appendChild(makeCell('Order Number', getOrderNumber(row)));
+            tr.appendChild(makeCell('Customer Name', row.fullname || '—'));
+            tr.appendChild(makeCell('Phone', row.phone || '—'));
+            tr.appendChild(makeCell('Country', row.country || '—'));
+            tr.appendChild(makeCell('Service', row.service || '—'));
+            tr.appendChild(makeCell('Price', formatCurrency(row.price)));
+
+            const statusCell = document.createElement('td');
+            statusCell.setAttribute('data-label', 'Status');
+            statusCell.innerHTML = `<span class="status-badge status-${status}">${statusLabel(status)}</span>`;
+            tr.appendChild(statusCell);
+
+            tr.appendChild(makeCell('Created At', formatDate(row.created_at)));
+
+            const waCell = document.createElement('td');
+            waCell.setAttribute('data-label', 'WhatsApp');
+            const wa = document.createElement('a');
+            wa.className = 'wa-btn';
+            wa.target = '_blank';
+            wa.rel = 'noopener noreferrer';
+            wa.href = 'https://wa.me/' + normalizePhone(row.phone || '');
+            wa.textContent = 'WhatsApp';
+            waCell.appendChild(wa);
+            tr.appendChild(waCell);
+
+            body.appendChild(tr);
+          });
+        }
+
+        function renderStats(rows){
+          const total = rows.length;
+          const pending = rows.filter((r)=>normalizePaymentStatus(r.payment_status) === 'pending').length;
+          const paidRows = rows.filter((r)=>normalizePaymentStatus(r.payment_status) === 'paid');
+          const paid = paidRows.length;
+          const revenue = paidRows.reduce((sum, r)=>sum + toNumber(r.price), 0);
+
+          statTotal.textContent = String(total);
+          statPending.textContent = String(pending);
+          statPaid.textContent = String(paid);
+          statRevenue.textContent = formatCurrency(revenue);
+        }
+
+        function populateServiceFilter(rows){
+          const seen = new Set();
+          rows.forEach((row)=>{
+            const service = String(row.service || '').trim();
+            if(service) seen.add(service);
+          });
+
+          Array.from(seen).sort((a,b)=>a.localeCompare(b,'fr')).forEach((service)=>{
+            const opt = document.createElement('option');
+            opt.value = service;
+            opt.textContent = service;
+            serviceFilter.appendChild(opt);
+          });
+        }
+
+        function normalizePaymentStatus(raw){
+          const value = String(raw || 'pending').toLowerCase().trim();
+          if(value === 'paid') return 'paid';
+          if(value === 'failed') return 'failed';
+          return 'pending';
+        }
+
+        function statusLabel(status){
+          if(status === 'paid') return 'Paid';
+          if(status === 'failed') return 'Failed';
+          return 'Pending';
+        }
+
+        function makeCell(label, text){
+          const td = document.createElement('td');
+          td.setAttribute('data-label', label);
+          td.textContent = text;
+          return td;
+        }
+
+        function getOrderNumber(row){
+          if(row.order_number) return String(row.order_number);
+          if(row.order_code) return String(row.order_code);
+          return row.id ? ('FLX-' + String(row.id).slice(0, 8).toUpperCase()) : '—';
+        }
+
+        function formatDate(value){
+          if(!value) return '—';
+          const d = new Date(value);
+          if(Number.isNaN(d.getTime())) return '—';
+          return d.toLocaleString('fr-FR');
+        }
+
+        function formatCurrency(value){
+          return toNumber(value).toLocaleString('fr-FR') + ' FCFA';
+        }
+
+        function toNumber(value){
+          const n = Number(value);
+          return Number.isFinite(n) ? n : 0;
+        }
+
+        function normalizePhone(phone){
+          return String(phone || '').replace(/[^\d]/g, '');
+        }
+
+        function showMessage(text){
+          msg.hidden = false;
+          msg.textContent = text;
+        }
+
+        async function loadOrders(){
+          try{
+            const response = await fetch('http://localhost:3000/api/orders');
+            if(!response.ok){
+              showMessage('Erreur API: ' + response.status + ' ' + response.statusText);
+              return null;
+            }
+            const payload = await response.json();
+            if(Array.isArray(payload)) return payload.slice();
+            if(payload && Array.isArray(payload.data)) return payload.data.slice();
+            showMessage('Format de reponse API invalide.');
+            return null;
+          }catch(err){
+            showMessage('Impossible de joindre http://localhost:3000/api/orders');
+            return null;
+          }
+        }
+      })();
+    </script>
+  </body>
+  </html>

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Paiement confirmé — Activation Telegram</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <main class="container" style="padding:120px 20px;max-width:720px;text-align:center">
+      <div class="success-card card" style="padding:36px;border-radius:14px;box-shadow:var(--shadow)">
+        <div class="success-ico" style="font-size:56px;margin-bottom:12px">✅</div>
+        <h1>Merci — Paiement reçu</h1>
+        <p id="message" style="color:var(--muted)">Votre demande a bien été enregistrée.</p>
+
+        <div class="order-meta" style="margin-top:18px;text-align:left;display:inline-block;min-width:320px">
+          <div><strong>Commande :</strong> <span id="orderCode">—</span></div>
+          <div><strong>Service :</strong> <span id="orderService">—</span></div>
+          <div><strong>Prix :</strong> <span id="orderPrice">—</span></div>
+        </div>
+
+        <div style="margin-top:24px">
+          <a id="continueWhatsapp" class="btn primary lg" href="#">Continuer vers WhatsApp</a>
+        </div>
+      </div>
+    </main>
+
+    <script src="config.js"></script>
+    <script src="vendor/supabase/supabase.js?v=3"></script>
+    <script src="supabase.js?v=3"></script>
+    <script>
+      (async function(){
+        const cfg = window.APP_CONFIG || {};
+        const WHATSAPP_NUMBER = cfg.WHATSAPP_NUMBER || 'MON_NUMERO';
+        const btn = document.getElementById('continueWhatsapp');
+        btn.setAttribute('href', `https://wa.me/${WHATSAPP_NUMBER}`);
+
+        // determine activation id: from query string or localStorage
+        const params = new URLSearchParams(location.search);
+        const activationId = params.get('activation_id') || localStorage.getItem('last_activation_id');
+        const orderNumber = params.get('order_number') || localStorage.getItem('last_order_number');
+        const orderCodeEl = document.getElementById('orderCode');
+        const orderServiceEl = document.getElementById('orderService');
+        const orderPriceEl = document.getElementById('orderPrice');
+        if(!activationId && !orderNumber){ document.getElementById('message').textContent = "Nous n'avons pas retrouve d'identifiant de demande."; return; }
+
+        // wait for supabase
+        let i=0; while((!window.supabaseClient || !window.supabase) && i<30){ await new Promise(r=>setTimeout(r,120)); i++; }
+        if(!window.supabaseClient || !window.supabase){ document.getElementById('message').textContent = 'Impossible de vérifier le statut (Supabase non initialisé).'; return; }
+
+        const res = activationId
+          ? await window.supabaseHelpers.getRequestById(activationId)
+          : await window.supabaseHelpers.getRequestByOrderNumber(orderNumber);
+        if(res.error){ document.getElementById('message').textContent = 'Erreur récupération: '+res.error.message; return; }
+        const row = res.data;
+        if(!row){ document.getElementById('message').textContent = 'Demande inconnue.'; return; }
+
+        const fallbackDate = row.created_at ? new Date(row.created_at).getFullYear() : '0000';
+        const fallbackId = row.id ? String(row.id).slice(0,6).toUpperCase() : 'UNKNOWN';
+        const code = row.order_number || row.order_code || `FLX-${fallbackDate}-${fallbackId}`;
+        orderCodeEl.textContent = code;
+        orderServiceEl.textContent = row.service || '—';
+        orderPriceEl.textContent = (row.price !== null && row.price !== undefined) ? (row.price + ' FCFA') : '—';
+
+        function escapeHtml(s){ if(!s) return ''; return String(s).replace(/[&<>"']/g, (c)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;" }[c])); }
+      })();
+    </script>
+  </body>
+  </html>
