@@ -1,13 +1,20 @@
 {
   "version": 2,
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/orders",
-      "destination": "/api/index.js"
+      "handle": "filesystem"
     },
     {
-      "source": "/webhooks/chariow",
-      "destination": "/api/index.js"
+      "src": "^/api/orders$",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "^/webhooks/chariow$",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "^/$",
+      "dest": "/index.html"
     }
   ]
 }
