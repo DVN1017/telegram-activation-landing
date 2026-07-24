@@ -17,10 +17,7 @@ const supabase = createClient(
 );
 
 app.get("/", (req, res) => {
-  if (process.env.VERCEL) {
-    return res.sendFile(path.join(__dirname, "index.html"));
-  }
-  res.send("API Flexi Activation OK");
+  return res.sendFile(path.join(__dirname, "index.html"));
 });
 
 app.get("/api/orders", async (req, res) => {
