@@ -73,6 +73,12 @@ label{display:block;margin-bottom:12px;font-size:14px}
 input[type="text"],input[type="email"],input[type="tel"]{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(16,24,40,0.06)}
 .checkbox{display:flex;align-items:center;gap:8px}
 .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+.modal-content h3{color:#f8fafc}
+.modal-content label{color:#e5e7eb}
+.modal-content .checkbox{color:#e5e7eb}
+.modal-content .checkbox a{color:#93c5fd}
+.modal-content .form-summary{color:#e5e7eb;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15)}
+.modal-content .form-summary strong{color:#f8fafc}
 .whatsapp-fab{position:fixed;right:20px;bottom:20px;background:linear-gradient(90deg,var(--accent),#10b981);color:white;padding:14px;border-radius:999px;box-shadow:var(--shadow);z-index:70;text-decoration:none;display:grid;place-items:center}
 @media(max-width:900px){
   .hero-grid{grid-template-columns:1fr}
