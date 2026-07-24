@@ -384,7 +384,7 @@
 
         async function loadOrders(){
           try{
-            const response = await fetch('http://localhost:3000/api/orders');
+            const response = await fetch('/api/orders');
             if(!response.ok){
               showMessage('Erreur API: ' + response.status + ' ' + response.statusText);
               return null;
@@ -395,7 +395,7 @@
             showMessage('Format de reponse API invalide.');
             return null;
           }catch(err){
-            showMessage('Impossible de joindre http://localhost:3000/api/orders');
+            showMessage('Impossible de joindre /api/orders');
             return null;
           }
         }
