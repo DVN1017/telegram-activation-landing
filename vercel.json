@@ -1,5 +1,13 @@
 {
   "version": 2,
+  "functions": {
+    "server.js": {
+      "includeFiles": "{index.html,style.css,config.js,main.js,supabase.js,success.html,admin.html,vendor/**}"
+    },
+    "api/index.js": {
+      "includeFiles": "{index.html,style.css,config.js,main.js,supabase.js,success.html,admin.html,vendor/**}"
+    }
+  },
   "routes": [
     {
       "handle": "filesystem"
